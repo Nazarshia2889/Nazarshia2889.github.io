@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CS180 Project 0 &mdash; Arshia Nayebnazar</title>
+<style>
+  :root {
+    --bg: #fbfaf8;
+    --fg: #1c1c1e;
+    --muted: #6b6a67;
+    --rule: #e2e0dc;
+  }
+  body {
+    margin: 0;
+    padding: 0 24px 96px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  main { max-width: 940px; margin: 0 auto; }
+
+  header { padding: 64px 0 40px; border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 2rem; margin: 0 0 8px; letter-spacing: -0.02em; }
+  header p { margin: 0; color: var(--muted); }
+  header a { color: inherit; }
+
+  section { padding: 48px 0; border-bottom: 1px solid var(--rule); }
+  section:last-of-type { border-bottom: none; }
+  h2 { font-size: 1.3rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { margin: 0 0 28px; color: var(--muted); font-size: 0.95rem; }
+  p { margin: 0 0 16px; }
+
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  figure { margin: 0; }
+  figure img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+    background: #eceae6;
+  }
+  figcaption {
+    margin-top: 8px;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  figcaption b { color: var(--fg); font-weight: 600; }
+
+  .single { max-width: 700px; margin: 0 auto 28px; }
+
+  @media (max-width: 640px) {
+    .pair { grid-template-columns: 1fr; }
+    header { padding: 40px 0 28px; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <h1>Project 0: Becoming Friends with Your Camera</h1>
+    <p>Arshia Nayebnazar &middot; CS180, Fall 2026 &middot; <a href="../index.html">back to portfolio</a></p>
+  </header>
+
+  <section>
+    <h2>Part 1: Selfie &mdash; The Wrong Way and The Right Way</h2>
+    <p class="sub">Two portraits of the same face at the same size in frame, shot from very different distances.</p>
+
+    <div class="pair">
+      <figure>
+        <img src="./media/face1.jpg" alt="Close-up selfie taken at arm's length">
+        <figcaption><b>Close-up.</b> Camera held at arm's length, no zoom.</figcaption>
+      </figure>
+      <figure>
+        <img src="./media/face2.jpg" alt="Selfie taken from several feet away with zoom">
+        <figcaption><b>Far away + zoom.</b> Camera several feet back, zoomed in to match face size.</figcaption>
+      </figure>
+    </div>
+
+  </section>
+
+  <section>
+    <h2>Part 2: Architectural Perspective Compression</h2>
+    <p class="sub">The same building facade, photographed from far away with zoom and from up close without.</p>
+
+    <div class="pair">
+      <figure>
+        <img src="./media/zoom_building.jpg" alt="Building photographed from far away with zoom">
+        <figcaption><b>Far away + zoom.</b> Shot from a distance, zoomed in.</figcaption>
+      </figure>
+      <figure>
+        <img src="./media/nozoom_building.jpg" alt="Building photographed from close up without zoom">
+        <figcaption><b>Close up, no zoom.</b> Shot from near the building, wide.</figcaption>
+      </figure>
+    </div>
+
+  </section>
+
+  <section>
+    <h2>Part 3: The Dolly Zoom</h2>
+    <p class="sub">Seven frames, walking backward while zooming in to hold the hat at a constant size.</p>
+
+    <div class="single">
+      <figure>
+        <img src="./media/dolly_zoom.gif" alt="Animated dolly zoom of a baseball cap on a windowsill">
+        <figcaption><b>Dolly zoom.</b> The cap stays the same size while the background expands behind it.</figcaption>
+      </figure>
+    </div>
+
+    <div class="pair">
+      <figure>
+        <img src="./media/object_1.jpg" alt="First dolly zoom frame, close to the hat and zoomed out">
+        <figcaption><b>Frame 1.</b> Close to the cap, fully zoomed out.</figcaption>
+      </figure>
+      <figure>
+        <img src="./media/object_7.jpg" alt="Last dolly zoom frame, far from the hat and zoomed in">
+        <figcaption><b>Frame 7.</b> Several steps back, zoomed in.</figcaption>
+      </figure>
+    </div>
+
+  </section>
+
+</main>
+</body>
+</html>
