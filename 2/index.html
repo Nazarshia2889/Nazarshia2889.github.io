@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CS180 Project 1 &mdash; Arshia Nayebnazar</title>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$']],
+      displayMath: [['$$', '$$']]
+    },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fbfaf8;
+    --fg: #1c1c1e;
+    --muted: #6b6a67;
+    --rule: #e2e0dc;
+  }
+  body {
+    margin: 0;
+    padding: 0 24px 96px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  main { max-width: 940px; margin: 0 auto; }
+
+  header { padding: 64px 0 40px; border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 2rem; margin: 0 0 8px; letter-spacing: -0.02em; }
+  header p { margin: 0; color: var(--muted); }
+  header a { color: inherit; }
+
+  section { padding: 48px 0; border-bottom: 1px solid var(--rule); }
+  section:last-of-type { border-bottom: none; }
+  h2 { font-size: 1.3rem; margin: 0 0 28px; letter-spacing: -0.01em; }
+  h3 {
+    font-size: 1rem;
+    margin: 36px 0 16px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  p { margin: 0 0 16px; }
+
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  figure { margin: 0; }
+  figure img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+    background: #eceae6;
+  }
+  figcaption {
+    margin-top: 8px;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+
+  .single { max-width: 700px; margin: 0 auto 28px; }
+  /* The .jpg plates are only ~390px wide natively; don't upscale them. */
+  .single.native { max-width: 420px; }
+
+  /* --- added for this project --- */
+
+  .triple {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  figcaption .shift {
+    display: block;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8125rem;
+  }
+
+  /* Tables can exceed a phone's width; let them scroll instead of
+     forcing the whole page to scroll horizontally. */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 0 0 28px;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 12px 8px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  th {
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.name { font-variant-numeric: normal; }
+  tr.fail td { color: #a03232; }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+  }
+  p code, li code, td code { background: #f3f1ed; padding: 1px 5px; border-radius: 3px; }
+
+  .eq {
+    margin: 0 0 24px;
+    padding: 4px 0;
+    overflow-x: auto;
+  }
+
+  ol, ul { margin: 0 0 16px; padding-left: 22px; }
+  li { margin-bottom: 8px; }
+
+  /* Drafting scaffold. Delete every .todo before submitting. */
+  .todo {
+    border-left: 3px solid #d9c37a;
+    background: #fdf8e8;
+    padding: 10px 14px;
+    margin: 0 0 16px;
+    font-size: 0.9375rem;
+    color: #6a5a28;
+  }
+  .todo::before {
+    content: "TODO ";
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 640px) {
+    .pair, .triple { grid-template-columns: 1fr; }
+    header { padding: 40px 0 28px; }
+    table { font-size: 0.875rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <h1>Project 1: Colorizing the Prokudin-Gorskii Photo Collection</h1>
+    <p>Arshia Nayebnazar &middot; CS180, Fall 2026 &middot; <a href="../index.html">back to portfolio</a></p>
+  </header>
+
+  <section>
+    <h2>Overview</h2>
+
+    <p>In the early 20th century, Sergei Mikhailovich Prokudin-Gorskii travelled across the Russian Empire to take color photographs of everything he saw. But how did he attain colored photographs so early in history? Prokudin-Gorskii used a clever technique: for a given scene, he took three different exposures and recorded them onto glass plates with a red, green, and blue filter. The goal of this project is to take these three glass plate images for a given scene and align them such that we can produce a well-defined colored picture.</p>
+
+    <p>The main challenge, however, is that since we have three separate images taken at different times from the same scene, there will inevitably be noise between the images. Each scan is one tall image with three vertically stacked channels in the order B, G, R from top to bottom. Naively stacking the three images results in the blurry image below. Therefore, our job is to use image processing techniques to create this RGB image with as few visual artifacts as possible.</p>
+
+    <div class="single native">
+      <figure>
+        <img src="./media/before_cathedral.jpg" alt="Cathedral plate with the three color channels stacked at zero displacement, showing heavy red and blue fringing">
+        <figcaption>The naive result: <code>cathedral.jpg</code>&rsquo;s three channels stacked with zero
+        displacement.</figcaption>
+      </figure>
+    </div>
+
+    <p>In summary, we hold the blue channel fixed, search for the $(dx, dy)$ that translates each of the green and red channels such that they align well, then stack these three channels. We start with a single-scale, exhaustive search approach, then also attempt a multi-scale pyramid alignment below.</p>
+  </section>
+
+  <section>
+    <h2>Scoring metrics</h2>
+
+    <p>Before we start implementing these two approaches, we needed a way to measure how well the channels aligned. We try two different scoring methods...</p>
+
+    <h3>L2 norm (sum of squared differences)</h3>
+
+    <p>With L2 norm of two images, we treat both channels as vectors of pixel intensity values and measure the Euclidean distance between them. The smaller the distance, the better the alignment, therefore the algorithm must minimize this metric.</p>
+
+    <div class="eq">
+      $$D \;=\; \sqrt{\sum_{x,\,y} \Big( I_1(x,\; y) \;-\; I_2(x,\, y) \Big)^{2}}$$
+    </div>
+
+    <h3>Normalized cross-correlation (NCC)</h3>
+
+    <p>With NCC, we represent the channels as vectors again, subtract each by their respective means, then normalize into unit length, and take the dot product. In contrast with L2 norm, higher dot product means more aligned, so we want to maximize this value. Subtracting the mean and normalizing allows us to measure how much two channels co-vary with each other instead of comparing absolute values.</p>
+
+    <div class="eq">
+      $$\mathrm{NCC} \;=\; \frac{I_1 - \overline{I_1}}{\lVert I_1 - \overline{I_1} \rVert} \;\cdot\; \frac{I_2 - \overline{I_2}}{\lVert I_2 - \overline{I_2} \rVert}$$
+    </div>
+
+    <p>We used both metrics for each technique. Though they largely agree across images, they drift in certain cases, such as the emir photo discussed below.</p>
+  </section>
+
+  <section>
+    <h2>Part 1: Single-scale alignment</h2>
+
+    <p>For this algorithm, we try integer displacements in a [-15, 15] window in both the x and y directions, score each one with either L2 Norm or NCC, and keep the best displacement vector in this window. Again, we do this alignment with blue as the base, and then align green and red on top of it. This algorithm is best suited for small images given we are doing an exhaustive search across a window of possible values.</p>
+
+    <h3>Why crop the border before scoring</h3>
+
+    <p>We also trim 15% of the border before we do the scoring at each step, such that only the inner region of the aligned channels is being scored. This is primarily because we use <code>np.roll</code>, which wraps pixels around the image to the opposite edge as the displacement is applied, so the borders may have significant mismatched bands of pixels despite looking reasonable on the interior. This distorts the score, and makes it more difficult to find a good optimum. Alternatively, the borders may be very similar across channels, so low displacement would be rewarded and good alignments are harder to find. In both cases, the score does not accurately capture the success of the alignment in the overall image.</p>
+
+    <h3>Results</h3>
+
+    <div class="pair">
+      <figure>
+        <img src="./media/before_cathedral.jpg" alt="Cathedral with channels stacked at zero displacement">
+        <figcaption>Before &mdash; zero displacement</figcaption>
+      </figure>
+      <figure>
+        <img src="./media/sc_l2_cathedral.jpg" alt="Cathedral after single-scale exhaustive alignment">
+        <figcaption>After &mdash; single-scale alignment</figcaption>
+      </figure>
+    </div>
+
+    <div class="triple">
+      <figure>
+        <img src="./media/sc_l2_cathedral.jpg" alt="Aligned color image of a cathedral on a hillside">
+        <figcaption>cathedral.jpg
+          <span class="shift">R (3, 12) &middot; G (2, 5)</span>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="./media/sc_l2_monastery.jpg" alt="Aligned color image of a monastery">
+        <figcaption>monastery.jpg
+          <span class="shift">R (2, 3) &middot; G (2, &minus;3)</span>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="./media/sc_l2_tobolsk.jpg" alt="Aligned color image of the town of Tobolsk">
+        <figcaption>tobolsk.jpg
+          <span class="shift">R (3, 6) &middot; G (3, 3)</span>
+        </figcaption>
+      </figure>
+    </div>
+
+    <h3>Displacement vectors</h3>
+
+    <p>Displacements are given as $(dx, dy)$, where $dx$ is the horizontal shift and $dy$ the
+    vertical shift applied to that channel relative to the fixed blue channel. Both L2 norm and NCC
+    returned identical displacements for all three images, so the table below applies to either
+    metric.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Red (dx, dy)</th>
+            <th>Green (dx, dy)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="name">cathedral.jpg</td><td>3, 12</td><td>2, 5</td></tr>
+          <tr><td class="name">monastery.jpg</td><td>2, 3</td><td>2, &minus;3</td></tr>
+          <tr><td class="name">tobolsk.jpg</td><td>3, 6</td><td>3, 3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>All three images show strong alignment with little visual artifacts. However, these were small images, and an exhaustive search was not computationally expensive. In the next section, we will be looking at <code>.tif</code> images, which are far larger and require a different algorithm.</p>
+  </section>
+
+  <section>
+    <h2>Part 2: Multi-scale pyramid alignment</h2>
+
+   <p><code>.tif</code> images are far larger (around 3700x3200 per channel), and searching a window would mean going through hundreds of thousands of candidates. The fix is to do this displacement algorithm at a downscaled version of the image, then refine this displacement as you scale back up to the original image, such that you don't have to do the full search on the original, large image first, and you have a reasonable prior on the displacement as you move down the pyramid. Here is an example below.</p>
+
+    <div class="pair">
+      <figure>
+        <img src="./media/before_harvesters.jpg" alt="Harvesters plate with channels stacked at zero displacement, heavily fringed">
+        <figcaption>Before &mdash; zero displacement</figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_harvesters.jpg" alt="Harvesters after pyramid alignment, sharply registered">
+        <figcaption>After &mdash; pyramid alignment, R (14, 123) &middot; G (17, 59)</figcaption>
+      </figure>
+    </div>
+
+    <h3>Step-by-step walkthrough</h3>
+
+    <ol>
+     <li>For the base case, if either dimension of the image is under 250 pixels, stop
+      recursing and run the full exhaustive $[-15, 15]$ search from Part 1.</li>
+
+      <li>Otherwise, halve both channels by taking every other row and
+      column.</li>
+
+      <li>Call the aligner on the half-size pair and get back its best
+      displacement $(dx, dy)$ at that coarser scale.</li>
+
+      <li>A one-pixel shift at the coarser level corresponds
+      to two pixels, so double both components: $dx = 2\,dx_{old}$ and $dy = 2\,dy_{old}$.</li>
+
+      <li>Roll the channel by that doubled estimate, then run a
+      narrow $[-3, 3]$ exhaustive search.</li>
+
+      <li>Return $(dx + dx_{\text{refine}},\; dy + dy_{\text{refine}})$
+      so each level adds its correction to the estimate handed up from below.</li>
+    </ol>
+
+    <p>The border crop here was raised from 15% to 22.5%, which was determined empirically.</p>
+
+    <p>For a ~3700px scan, we would halve until under 250 through about four levels, where we would have far fewer candidate displacements.</p>
+
+    <h3>Results on all 14 provided images</h3>
+
+    <div class="triple">
+      <figure>
+        <img src="./media/ms_l2_church.jpg" alt="Aligned color image of a church beside a river">
+        <figcaption>church.tif<span class="shift">R (&minus;4, 58) &middot; G (4, 25)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_emir.jpg" alt="Emir portrait with a badly misaligned red channel producing a ghosted double image">
+        <figcaption>emir.tif &mdash; see failure case below<span class="shift">R (&minus;211, 238) &middot; G (24, 49)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_harvesters.jpg" alt="Aligned color image of harvesters in a tea field">
+        <figcaption>harvesters.tif<span class="shift">R (14, 123) &middot; G (17, 59)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_icon.jpg" alt="Aligned color image of a religious icon">
+        <figcaption>icon.tif<span class="shift">R (23, 89) &middot; G (17, 41)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_ilemselga.jpg" alt="Aligned color image of Ilemselga">
+        <figcaption>ilemselga.tif<span class="shift">R (11, 131) &middot; G (7, 40)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_melons.jpg" alt="Aligned color image of a melon market">
+        <figcaption>melons.tif<span class="shift">R (14, 178) &middot; G (10, 81)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_religous_painting.jpg" alt="Aligned color image of a religious painting">
+        <figcaption>religous_painting.tif<span class="shift">R (7, 69) &middot; G (3, 29)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_self_portrait.jpg" alt="Aligned color self-portrait of Prokudin-Gorskii seated by a stream">
+        <figcaption>self_portrait.tif<span class="shift">R (37, 175) &middot; G (29, 78)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_siren.jpg" alt="Aligned color image of a carved siren">
+        <figcaption>siren.tif<span class="shift">R (&minus;24, 97) &middot; G (&minus;5, 50)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_three_generations.jpg" alt="Aligned color portrait of three generations of a family">
+        <figcaption>three_generations.tif<span class="shift">R (12, 111) &middot; G (15, 52)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_wharf.jpg" alt="Aligned color image of a wharf">
+        <figcaption>wharf.tif<span class="shift">R (&minus;15, 82) &middot; G (&minus;6, 15)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_cathedral.jpg" alt="Aligned color image of a cathedral, pyramid method">
+        <figcaption>cathedral.jpg<span class="shift">R (3, 12) &middot; G (2, 5)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_monastery.jpg" alt="Aligned color image of a monastery, pyramid method">
+        <figcaption>monastery.jpg<span class="shift">R (2, 3) &middot; G (2, &minus;3)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_tobolsk.jpg" alt="Aligned color image of Tobolsk, pyramid method">
+        <figcaption>tobolsk.jpg<span class="shift">R (3, 7) &middot; G (3, 3)</span></figcaption>
+      </figure>
+    </div>
+
+    <h3>Displacement vectors, both metrics</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>L2 red</th>
+            <th>L2 green</th>
+            <th>NCC red</th>
+            <th>NCC green</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="name">church.tif</td><td>&minus;4, 58</td><td>4, 25</td><td>&minus;4, 58</td><td>4, 25</td></tr>
+          <tr class="fail"><td class="name">emir.tif</td><td>&minus;211, 238</td><td>24, 49</td><td>&minus;222, 151</td><td>24, 48</td></tr>
+          <tr><td class="name">harvesters.tif</td><td>14, 123</td><td>17, 59</td><td>14, 123</td><td>17, 59</td></tr>
+          <tr><td class="name">icon.tif</td><td>23, 89</td><td>17, 41</td><td>23, 89</td><td>17, 41</td></tr>
+          <tr><td class="name">ilemselga.tif</td><td>11, 131</td><td>7, 40</td><td>11, 131</td><td>7, 40</td></tr>
+          <tr><td class="name">melons.tif</td><td>14, 178</td><td>10, 81</td><td>14, 178</td><td>10, 81</td></tr>
+          <tr><td class="name">religous_painting.tif</td><td>7, 69</td><td>3, 29</td><td>7, 69</td><td>3, 29</td></tr>
+          <tr><td class="name">self_portrait.tif</td><td>37, 175</td><td>29, 78</td><td>37, 175</td><td>29, 78</td></tr>
+          <tr><td class="name">siren.tif</td><td>&minus;24, 97</td><td>&minus;5, 50</td><td>&minus;24, 96</td><td>&minus;5, 49</td></tr>
+          <tr><td class="name">three_generations.tif</td><td>12, 111</td><td>15, 52</td><td>12, 111</td><td>14, 52</td></tr>
+          <tr><td class="name">wharf.tif</td><td>&minus;15, 82</td><td>&minus;6, 15</td><td>&minus;15, 82</td><td>&minus;6, 15</td></tr>
+          <tr><td class="name">cathedral.jpg</td><td>3, 12</td><td>2, 5</td><td>3, 12</td><td>2, 5</td></tr>
+          <tr><td class="name">monastery.jpg</td><td>2, 3</td><td>2, &minus;3</td><td>2, 3</td><td>2, &minus;3</td></tr>
+          <tr><td class="name">tobolsk.jpg</td><td>3, 7</td><td>3, 3</td><td>3, 7</td><td>3, 3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The two metrics largely agree on most images, however, they diverge on <code>emir.tif</code>, and the alignment exclusively doesn't work on this image relative to the others.</p>
+  </section>
+
+  <section>
+    <h2>Failure case: emir.tif</h2>
+
+    <div class="triple">
+      <figure>
+        <img src="./media/before_emir.jpg" alt="Emir plate with channels stacked at zero displacement">
+        <figcaption>Unaligned<span class="shift">R (0, 0) &middot; G (0, 0)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_emir.jpg" alt="Emir aligned with the L2 metric, red channel grossly displaced">
+        <figcaption>L2 metric<span class="shift">R (&minus;211, 238) &middot; G (24, 49)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_ncc_emir.jpg" alt="Emir aligned with the NCC metric, red channel displaced differently">
+        <figcaption>NCC metric<span class="shift">R (&minus;222, 151) &middot; G (24, 48)</span></figcaption>
+      </figure>
+    </div>
+
+    <p>The green channel actually aligns quite okay in both metrics for this image, but the red channel is completely wrong. This indicates the red and blue alignment has an issue.</p>
+
+    <p>Since the emir's robe is very blue in the blue channel but completely dark in the red channel, and it makes up a large part of the image, there is a huge difference between the brightness values, and the metric scores blow up and the search fails. Since the NCC and L2 disagree so strongly, this is also evidence that an optimal alignment is not easily achievable through these metrics for this image. One possible fix is a bells and whistle feature, like using edge structure to align the channels, since this is shared across them and significant intensity differences do not corrupt the score.</p>
+  </section>
+
+  <section>
+    <h2>Part 3: Images of my own choosing</h2>
+
+    <p>These were 3 images I selected from the Library of Congress Prokudin-Gorskii collection, using the same techniques as above.</p>
+
+    <div class="triple">
+      <figure>
+        <img src="./media/ms_l2_house.jpg" alt="Aligned color image of a house">
+        <figcaption>house.tif<span class="shift">R (35, 121) &middot; G (19, 26)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_mosque.jpg" alt="Aligned color image of a mosque">
+        <figcaption>mosque.tif<span class="shift">R (8, 79) &middot; G (6, 32)</span></figcaption>
+      </figure>
+      <figure>
+        <img src="./media/ms_l2_napoleon.jpg" alt="Aligned color image relating to Napoleon">
+        <figcaption>napoleon.tif<span class="shift">R (&minus;3, 133) &middot; G (5, 63)</span></figcaption>
+      </figure>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Red (dx, dy)</th>
+            <th>Green (dx, dy)</th>
+            <th>L2 vs. NCC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="name">house.tif</td><td>35, 121</td><td>19, 26</td><td class="name">identical</td></tr>
+          <tr><td class="name">mosque.tif</td><td>8, 79</td><td>6, 32</td><td class="name">identical</td></tr>
+          <tr><td class="name">napoleon.tif</td><td>&minus;3, 133</td><td>5, 63</td><td class="name">identical</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+</main>
+</body>
+</html>
