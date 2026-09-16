@@ -168,7 +168,7 @@
 
     <p>In the early 20th century, Sergei Mikhailovich Prokudin-Gorskii travelled across the Russian Empire to take color photographs of everything he saw. But how did he attain colored photographs so early in history? Prokudin-Gorskii used a clever technique: for a given scene, he took three different exposures and recorded them onto glass plates with a red, green, and blue filter. The goal of this project is to take these three glass plate images for a given scene and align them such that we can produce a well-defined colored picture.</p>
 
-    <p>The main challenge, however, is that since we have three separate images taken at different times from the same scene, there will inevitably be noise between the images. Each scan is one tall image with three vertically stacked channels in the order B, G, R from top to bottom. Naively stacking the three images results in the blurry image below. Therefore, our job is to use image processing techniques to create this RGB image with as few visual artifacts as possible.</p>
+    <p>The main challenge, however, is that since we have three separate images taken at different times from the same scene, there will inevitably be some differences between the images. Each scan is one tall image with three vertically stacked channels in the order B, G, R from top to bottom. Naively stacking the three images results in the blurry image below. Therefore, our job is to use image processing techniques to create this RGB image with as few visual artifacts as possible.</p>
 
     <div class="single native">
       <figure>
@@ -196,7 +196,7 @@
 
     <h3>Normalized cross-correlation (NCC)</h3>
 
-    <p>With NCC, we represent the channels as vectors again, subtract each by their respective means, then normalize into unit length, and take the dot product. In contrast with L2 norm, higher dot product means more aligned, so we want to maximize this value. Subtracting the mean and normalizing allows us to measure how much two channels co-vary with each other instead of comparing absolute values.</p>
+    <p>With NCC, we represent the channels as vectors again, subtract each by their respective means, then normalize into unit length and take the dot product. In contrast with L2 norm, higher dot product means more aligned, so we want to maximize this value. Subtracting the mean and normalizing allows us to measure how much two channels co-vary with each other instead of comparing absolute values.</p>
 
     <div class="eq">
       $$\mathrm{NCC} \;=\; \frac{I_1 - \overline{I_1}}{\lVert I_1 - \overline{I_1} \rVert} \;\cdot\; \frac{I_2 - \overline{I_2}}{\lVert I_2 - \overline{I_2} \rVert}$$
@@ -212,7 +212,7 @@
 
     <h3>Why crop the border before scoring</h3>
 
-    <p>We also trim 15% of the border before we do the scoring at each step, such that only the inner region of the aligned channels is being scored. This is primarily because we use <code>np.roll</code>, which wraps pixels around the image to the opposite edge as the displacement is applied, so the borders may have significant mismatched bands of pixels despite looking reasonable on the interior. This distorts the score, and makes it more difficult to find a good optimum. Alternatively, the borders may be very similar across channels, so low displacement would be rewarded and good alignments are harder to find. In both cases, the score does not accurately capture the success of the alignment in the overall image.</p>
+    <p>We also trim 15% of the border before we do the scoring at each step, such that only the inner region of the aligned channels is being scored. This is partially because we use <code>np.roll</code>, which wraps pixels around the image to the opposite edge as the displacement is applied, so the borders may have significant mismatched bands of pixels despite looking reasonable on the interior. This distorts the score, and makes it more difficult to find a good optimum. Alternatively, the borders may be very similar across channels, so low displacement would be rewarded and good alignments are harder to find. In both cases, the score does not accurately capture the success of the alignment in the overall image.</p>
 
     <h3>Results</h3>
 
@@ -278,7 +278,7 @@
   <section>
     <h2>Part 2: Multi-scale pyramid alignment</h2>
 
-   <p><code>.tif</code> images are far larger (around 3700x3200 per channel), and searching a window would mean going through hundreds of thousands of candidates. The fix is to do this displacement algorithm at a downscaled version of the image, then refine this displacement as you scale back up to the original image, such that you don't have to do the full search on the original, large image first, and you have a reasonable prior on the displacement as you move down the pyramid. Here is an example below.</p>
+   <p><code>.tif</code> images are far larger (around 3700x3200 per channel), and searching a window would mean going through hundreds of thousands of candidates. The fix is to do this displacement algorithm on a downscaled version of the image first. Then, refine this displacement as you scale back up to the original image such that you don't have to do the full search on the original, large image first, and you have a reasonable prior on the displacement as you move down the pyramid. Here is an example below.</p>
 
     <div class="pair">
       <figure>
@@ -410,7 +410,7 @@
       </table>
     </div>
 
-    <p>The two metrics largely agree on most images, however, they diverge on <code>emir.tif</code>, and the alignment exclusively doesn't work on this image relative to the others.</p>
+    <p>The two metrics largely agree on most images, however, they diverge on <code>emir.tif</code>, and the alignment doesn't work on this image as well as the others.</p>
   </section>
 
   <section>
@@ -433,7 +433,7 @@
 
     <p>The green channel actually aligns quite okay in both metrics for this image, but the red channel is completely wrong. This indicates the red and blue alignment has an issue.</p>
 
-    <p>Since the emir's robe is very blue in the blue channel but completely dark in the red channel, and it makes up a large part of the image, there is a huge difference between the brightness values, and the metric scores blow up and the search fails. Since the NCC and L2 disagree so strongly, this is also evidence that an optimal alignment is not easily achievable through these metrics for this image. One possible fix is a bells and whistle feature, like using edge structure to align the channels, since this is shared across them and significant intensity differences do not corrupt the score.</p>
+    <p>Since the emir's robe is very blue in the blue channel but completely dark in the red channel (and it makes up a large part of the image) there is a huge difference between the brightness values. The metric scores blow up and the search fails. Since the NCC and L2 disagree so strongly, this is also evidence that an optimal alignment is not easily achievable through these specific metrics for this image. One possible fix is a "bells and whistle" feature: using edge structure to align the channels instead, since this is shared across them and significant intensity differences do not corrupt the score.</p>
   </section>
 
   <section>
