@@ -458,6 +458,10 @@
 
     <p>Finally, we aim to blend two images while trying our best not to have a sharp divide between the objects of interest. To do this, we use stacks. With the Gaussian stack, we repeatedly blur (sigma = 6 in this case) each image, and save these results across levels. We then use a Laplacian stack, which takes the difference between consecutive Gaussian levels, highlighting frequency differences between each level. At the last level, we simply append the last Gaussian level. Below is an example of stacking, reproducing the figure from Szeliski Fig. 3.42, where the first three rows are laplacian levels 0, 2, 4, and our summed result on the last row,. For this figure, +0.5 is added to the image so the clipped image (between 0 and 1) does not discount negative values (negative values become dark gray, and the positive ones become lighter gray). As we move down the stack, we go from finer details being captured, to smooth, wider transitions instead.</p>
 
+    <div class="single">
+      <figure><img src="./media/2.3/oraple_stacks.png" alt="Recreation of Szeliski Figure 3.42: masked Laplacian levels of the apple, the orange, and their sum, plus the final collapsed images"><figcaption>Recreating Szeliski Fig. 3.42. Rows: Laplacian levels 0, 2, 4, then the collapsed result. Columns: masked apple, masked orange, combined.</figcaption></figure>
+    </div>
+
   </section>
 
   <!-- ================================================================ -->
