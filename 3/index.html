@@ -187,18 +187,19 @@
 
   <section>
     <h2>Overview</h2>
-    <p>In this project, we will be exploring convolutions and filters, as well as frequency-level image processing. In part one, we'll take a look at basic convolutional filters and partial derivatives of images, combining these concepts to extract edges from our images! In part two, we'll sharpen blurry images, combine images into hybrids with different frequency filters, as well as applying Gaussian and Laplacian stacks to to smoothly blend images together.</p>
+    <p>In this project, we will be exploring convolutions and filters and frequency-domain image processing. In part one, we'll take a look at basic convolutional filters and partial derivatives of images, combining these concepts to extract edges from our images. In part two, we'll sharpen blurry images, combine images into hybrids with different frequency filters, as well as apply Gaussian and Laplacian stack to blend images together with smoother transitions.</p>
   </section>
 
   <!-- ================================================================ -->
   <section>
     <h2>Part 1.1: Convolutions from scratch</h2>
+    <p>What is our goal with convolutions? We are essentially trying to extract important features from an image. We do so through kernels, which we slide across the image and apply a similar operation to cross-correlation: take the elementwise product of the filter with its corresponding window, but with the reverse of the filter.</p>
 
-    <p>For both self-implementations of the convolution operation below, we specify the center pixel position of the filter, which we use to keep track of the size of the padding in both functions, but also to index the two innermost loops across the whole filter for the first implementation.</p>
+    <p>For both self-implementations of the convolution operation below, we specify the central pixel position of the filter. We use this to keep track of the size of the padding in both functions, but also to help index the two innermost loops across the whole filter for the first implementation.</p>
     
-    <p>The first implementation of the convolution operation is done with four for loops. The first two loops go through every pixel of the output image size, which in this case is the same. Then, the next two loops go from the top to the bottom with u, and from left to right with v. The output pixel is computed such that convolution is computed with the reverse of the filter. For example, the first pixel in the region of interest is multiplied with the last pixel of the filter. This is characteristic of a true convolution, and not a cross-correlation, which does not reverse the filter.</p>
+    <p>The first implementation of the convolution operation is done with four for loops. The first two loops go through every pixel of the output image size, which is the same as the original image size. Then, the next two loops go from the top to the bottom of the filter with u, and from left to right with v. The output pixel is computed such that the product is indexing in the reverse direction of the filter. For example, the first pixel in the current window is multiplied with the last pixel of the filter. As mentioned, this defined the convolution operation (as opposed to cross-correlation, which does not reverse the filter).</p>
 
-    <p>The second implementation is very similar, except we replace the innermost two loops with a single operation, in which we take the current region of interest on the image, and then for each output pixel value, we use elementwise multiplication (permitted with numpy arrays) and take their sum. We compare our implementation with the <code>scipy.signal.convolve2d</code> implementation, and compare runtimes of each implementation.</p>
+    <p>The second implementation is very similar, except we replace the innermost two loops with a single operation, in which we take the current window, and then for each output pixel value, we do a direct elementwise multiplication of the two arrays (inherently permitted by NumPy) and take their sum. We compare our implementation with the <code>scipy.signal.convolve2d</code> implementation, and compare runtimes of each implementation.</p>
 
     <h3>Four loops</h3>
 <pre><code>def convfour(img, filter):
@@ -236,7 +237,7 @@
     return output</code></pre>
 
     <h3>Boundary handling</h3>
-    <p>For the padding itself, we do zero padding in "same" mode, as applied with the <code>scipy.signal.convolve2d(..., mode='same')</code> function, meaning we pad the image with 0s such that the image size stays the same. We add columns of 0s on both sides (enough equal to the filter column size // 2), and similarly for the rows, which allows the center of the filter to start on the top leftmost pixel of the image and end on the bottom rightmost pixel as valid filter positions. Since the filter at the boundaries takes into account 0s, the image edges are darker.</p>
+    <p>For the padding itself, we do zero padding in "same" mode, as applied with the <code>scipy.signal.convolve2d(..., mode='same')</code> function, meaning we pad the image with 0s such that the original and output image sizes are the same. We add columns of 0s on the left and right side of the image equivalent to half the column size of the filter. Similarly for the rows, we add rows on the top and bottom of the image equivalent to half the row size of the filter. What does this allow us to do? The center of the filter can now be positioned to start on the top leftmost pixel of the image and end on the bottom rightmost pixel, since the padding allows the edge of the filter to rest on the 0s. Though since the filter at the boundaries sums in artifical 0s, the image edges are darker.</p>
 
     <h3>Results</h3>
     <div class="single narrow">
@@ -247,17 +248,17 @@
     </div>
 
     <div class="triple">
-      <figure><img src="./media/1.1/self_box_four.png" alt="9 by 9 box filter, four-loop implementation"><figcaption>9&times;9 box &middot; four loops</figcaption></figure>
-      <figure><img src="./media/1.1/self_box.png" alt="9 by 9 box filter, two-loop implementation"><figcaption>9&times;9 box &middot; two loops</figcaption></figure>
-      <figure><img src="./media/1.1/self_box_scipy.png" alt="9 by 9 box filter, scipy"><figcaption>9&times;9 box &middot; scipy</figcaption></figure>
+      <figure><img src="./media/1.1/self_box_four.png" alt="9 by 9 box filter, four-loop implementation"><figcaption>9&times;9 box, four loops</figcaption></figure>
+      <figure><img src="./media/1.1/self_box.png" alt="9 by 9 box filter, two-loop implementation"><figcaption>9&times;9 box, two loops</figcaption></figure>
+      <figure><img src="./media/1.1/self_box_scipy.png" alt="9 by 9 box filter, scipy"><figcaption>9&times;9 box, scipy</figcaption></figure>
 
-      <figure><img src="./media/1.1/self_dx_four.png" alt="Dx, four-loop implementation"><figcaption>D<sub>x</sub> &middot; four loops</figcaption></figure>
-      <figure><img src="./media/1.1/self_dx.png" alt="Dx, two-loop implementation"><figcaption>D<sub>x</sub> &middot; two loops</figcaption></figure>
-      <figure><img src="./media/1.1/self_dx_scipy.png" alt="Dx, scipy"><figcaption>D<sub>x</sub> &middot; scipy</figcaption></figure>
+      <figure><img src="./media/1.1/self_dx_four.png" alt="Dx, four-loop implementation"><figcaption>D<sub>x</sub>, four loops</figcaption></figure>
+      <figure><img src="./media/1.1/self_dx.png" alt="Dx, two-loop implementation"><figcaption>D<sub>x</sub>, two loops</figcaption></figure>
+      <figure><img src="./media/1.1/self_dx_scipy.png" alt="Dx, scipy"><figcaption>D<sub>x</sub>, scipy</figcaption></figure>
 
-      <figure><img src="./media/1.1/self_dy_four.png" alt="Dy, four-loop implementation"><figcaption>D<sub>y</sub> &middot; four loops</figcaption></figure>
-      <figure><img src="./media/1.1/self_dy.png" alt="Dy, two-loop implementation"><figcaption>D<sub>y</sub> &middot; two loops</figcaption></figure>
-      <figure><img src="./media/1.1/self_dy_scipy.png" alt="Dy, scipy"><figcaption>D<sub>y</sub> &middot; scipy</figcaption></figure>
+      <figure><img src="./media/1.1/self_dy_four.png" alt="Dy, four-loop implementation"><figcaption>D<sub>y</sub>, four loops</figcaption></figure>
+      <figure><img src="./media/1.1/self_dy.png" alt="Dy, two-loop implementation"><figcaption>D<sub>y</sub>, two loops</figcaption></figure>
+      <figure><img src="./media/1.1/self_dy_scipy.png" alt="Dy, scipy"><figcaption>D<sub>y</sub>, scipy</figcaption></figure>
     </div>
 
     <h3>Runtime</h3>
@@ -271,14 +272,14 @@
         </tbody>
       </table>
     </div>
-    <p>For the box filter, the two loops is nearly 10x faster than the four loops. The difference is not as noticeable with the partial derivatives, given that the filter size is not as large, and the biggest cause for the four for loop slowdown is looping over individual elements in the filter, so a larger filter size leads to longer runtimes. In all three cases, however, <code>scipy</code> is significantly faster. With regard to the photos themselves, we notice that the box filter creates a small blur, the partial derivative in the x direction highlights vertical edges, while the y direction highlights horizontal edges. We discuss the partial derivatives further below.</p>
+    <p>For the box filter, the two loops is nearly 10x faster than the four loops. The direction of time difference is reversed with the partial derivatives, given that the filter size is not as large. The biggest cause of the four for loop slowdown is looping over individual elements in the filter, so a larger filter size leads to longer runtimes. In all three cases, however, <code>scipy</code> is significantly faster. With regard to the photos themselves, we notice that the box filter creates a small blur, the partial derivative in the x direction highlights vertical edges, while the y direction highlights horizontal edges. We discuss the partial derivatives further below.</p>
   </section>
 
   <!-- ================================================================ -->
   <section>
     <h2>Part 1.2: Finite difference operator</h2>
 
-    <p>Next, we take the partial derivatives in the x and y direction of the following cameraman image. In this case, D<sub>x</sub> = [1, 0, &minus;1] and D<sub>y</sub> = D<sub>x</sub><sup>T</sup>. These reflect the slope equation. For example, with D<sub>x</sub>, we are taking the pixel value to the right of the current pixel and subtracting the left, while omitting the division (in this case, it would've been two, for a step size of two). These highlight vertical and horizontal lines, respectively. We also take the magnitude of the gradient as the intensity of each pixel value, as defined below:</p>
+    <p>Next, we take the partial derivatives in the x and y direction of the following "cameraman" image. In this case, D<sub>x</sub> = [1, 0, &minus;1] and D<sub>y</sub> = D<sub>x</sub><sup>T</sup>. These filters are a reflection of taking the slope! For example, with D<sub>x</sub>, we are taking the pixel value to the right of the current pixel and subtracting the left, while omitting the division (in this case, it would've been two, for a step size of two). D<sub>x</sub> and D<sub>y</sub> highlight vertical and horizontal edges, respectively. We also produce an image by take the magnitude of the gradient as the intensity of each pixel, as defined below:</p>
 
     <div class="eq">
       $$\lVert \nabla I \rVert = \sqrt{\left(\frac{\partial I}{\partial x}\right)^2 + \left(\frac{\partial I}{\partial y}\right)^2}$$
@@ -297,7 +298,7 @@
       <figure><img src="./media/1.2/cameraman_edges.png" alt="Binarized edge image, threshold 80"><figcaption>Binarized edges, threshold = 80</figcaption></figure>
     </div>
 
-    <p>For the binarized image, we take the gradient magnitude image, and values above 80 were let through while the rest were set to black. This gives us clearer edges, but some of the previously mentioned noise bleeds through. We chose this threshold through trial error, making sure the number is high enough to block noise, while not too high, where we would be blocking real signal (i.e.meaningful edges of the cameraman and his tripod).</p>
+    <p>For the binarized image, we take the gradient magnitude image, and values above 80 were let through while the rest were set to black. This gives us clearer edges, but some of the previously mentioned noise bleeds through. We chose this threshold through trial and error, making sure the number is high enough to block out noise, but not too high to block out real signal (i.e. meaningful edges depicting the cameraman and his tripod).</p>
   </section>
 
   <!-- ================================================================ -->
@@ -306,7 +307,7 @@
 
     <h3>Method 1: blur, then take derivatives</h3>
 
-    <p>One way to fix the above noise is to do a Gaussian blur, also known as a low pass filter. A Gaussian blur takes a bell shaped filter and convolves it with the image, averageing out high frequencies and letting low frequencies through ("low pass"). The smooth, blurry image has less noise as sharp changes arent as pronounced. We build this by using <code>cv2.getGaussianKernel(9, sigma=2)</code> and taking the outer product wiht its transpose. Repeating the same process as 1.2, except using the blurred version of the cameraman, leads to less noisy results.</p>
+    <p>How can we fix the noise problem above? One way is to do a Gaussian blur, also known as a low-pass filter. A Gaussian blur takes a bell-shaped filter and convolves it with the image, averaging out high frequencies and letting low frequencies pass through ("low-pass"). The smooth, blurry image is less noisy since sudden changes aren't as pronounced. We build this by using <code>cv2.getGaussianKernel(9, sigma=2)</code> and taking the outer product with its transpose (resulting in a 9x9 kernel, in this case). Repeating the same process as 1.2 but with the blurred version of the cameraman leads to less noisy results.</p>
 
     <div class="pair">
       <figure><img src="./media/1.3/cameraman_gauss.png" alt="Gaussian-blurred cameraman"><figcaption>Blurred (9&times;9, &sigma; = 2)</figcaption></figure>
@@ -316,7 +317,7 @@
     </div>
 
     <h3>Method 2: a single DoG filter</h3>
-    <p>An alternative way of doing this is taking the partial derivative of the Gaussian filter first, such that the blurring and derivatives occur on the image at the same time, and a separate blurring step at the beginning does not need to happen. This approach is mathematically equivalent to the previous, since convolutions are an associative operator, so convolving the derivatives with the blur filter first, instead of blur and image first, makes no difference.</p>
+    <p>An alternative way of doing this is taking the partial derivative of the Gaussian filter first, such that the blurring and derivatives occur on the image at the same time, so we skip a separate blurring step at the beginning. This approach is mathematically equivalent to the previous: since convolutions are an associative operator, convolving the derivatives with the blur filter first, instead of doing the blur on the image first and then the derivatives, is the same.</p>
 
     <div class="pair">
       <figure><img class="pixel" src="./media/1.3/dog_x_kernel.png" alt="DoG x kernel, 9 by 9"><figcaption>DoG<sub>x</sub> kernel (9&times;9, enlarged)</figcaption></figure>
@@ -336,14 +337,16 @@
       <figure><img src="./media/1.3/cameraman_dog_edges.png" alt="Edges from DoG filter"><figcaption>DoG, t = 30</figcaption></figure>
     </div>
 
-    <p>As can be seen, the Gaussian blur led to thicker and more pronounced edges, and less of the specks at the bottom from the noisy grass can be noticed. As mentioned, the blur-then-derivative leads to the same results as DoG as they are mathematically equivalent. Our threshold was also smaller, which makes sense, given the blur limited high frequencies, and therefore, high gradients.</p>
+    <p>As can be seen, the Gaussian blur led to thicker and more pronounced edges, and less specks at the bottom from the noisy grass. As mentioned, both methods lead to the same visual results due to their mathematical equivalence. Our threshold was also smaller (30), which makes sense, given the blur limited high frequencies, and therefore, overly high gradients.</p>
 
   </section>
 
   <!-- ================================================================ -->
   <section>
     <h2>Part 2.1: Image sharpening</h2>
-    <p>We now move on to image processing in the frequency domain, starting with sharpening blurry images! To do this, we aim to retrieve some of the high frequencies of the image, which help define the image, and bring it back to the original image. Therefore, we take the low frequencies of the image, subtract it from the original to get the high frequencies, and then add them to the original image, weighted by an &alpha; term. We get the low frequencies through our low pass filter: another Gaussian blur. In fact, this operation can be collapsed into one filter. In the equation below, f is the original image, &alpha; is our weighting factor, and g is the Gaussian blur, convolving with f. On the right, e is a filter the same size as the Gaussian, but with zeros everywhere except a one in the middle. It doesn't affect the final outcome, but helps us combine this operation into one sharpening filter. </p>
+    <p>We now move on to more image processing in the frequency domain, starting with sharpening blurry images! To do this, we retrieve the image-defining high frequencies of the image, and add it back to the original image. More specifically, we take the low frequencies of the image, subtract it from the original to get the high frequencies, and then add them to the original image weighted by an &alpha; term. We get the low frequencies through our low pass filter (another Gaussian blur). </p>
+    
+    <p>In fact, this operation can be collapsed into one filter. In the equation below, f is the original image, &alpha; is our weighting factor, and g is the Gaussian blur, convolved with f. On the right, e is a filter the same size as the Gaussian, but with zeros everywhere except a one in the middle. It doesn't affect the final outcome, but helps us combine this operation into one sharpening filter. </p>
     <div class="eq">
       $$f + \alpha\,(f - f * g) \;=\; f * \big((1+\alpha)\,e - \alpha\, g\big)$$
     </div>
@@ -360,38 +363,40 @@
     <div class="wide">
       <figure><img src="./media/2.1/taj_alphas.jpg" alt="Taj Mahal sharpened at alpha 0, 1, 5, and 10"><figcaption>&alpha; = 0, 1, 5, 10</figcaption></figure>
     </div>
-    <p>Above, we sharpen the Taj Mahal, and test different values of alpha. As alpha grows, the image starts getting sharper, but too high (e.g. alpha of 10), then too much high frequency is added back, and the image starts getting noisy.</p>
+    <p>Above, we sharpen the Taj Mahal, and test different values of alpha. As alpha grows, the image starts getting sharper. Too high, though, (e.g. alpha = 10) and too much high frequency is added back, so the image starts getting noisy.</p>
 
     <h3>My own images</h3>
     <div class="pair">
-      <figure><img src="./media/inputs/new_york.jpg" alt="Original New York skyline at night"><figcaption>New York &middot; original</figcaption></figure>
-      <figure><img src="./media/2.1/ny_sharp.jpg" alt="Sharpened New York skyline"><figcaption>New York &middot; sharpened, &alpha; = 5</figcaption></figure>
-      <figure><img src="./media/2.1/ny_crop.png" alt="Full-resolution crop of skyscraper windows, original"><figcaption>Crop at full resolution &middot; original</figcaption></figure>
-      <figure><img src="./media/2.1/ny_sharp_crop.png" alt="Same crop, sharpened"><figcaption>Crop at full resolution &middot; sharpened</figcaption></figure>
+      <figure><img src="./media/inputs/new_york.jpg" alt="Original New York skyline at night"><figcaption>New York, original</figcaption></figure>
+      <figure><img src="./media/2.1/ny_sharp.jpg" alt="Sharpened New York skyline"><figcaption>New York, sharpened, &alpha; = 5</figcaption></figure>
+      <figure><img src="./media/2.1/ny_crop.png" alt="Full-resolution crop of skyscraper windows, original"><figcaption>Crop at full resolution, original</figcaption></figure>
+      <figure><img src="./media/2.1/ny_sharp_crop.png" alt="Same crop, sharpened"><figcaption>Crop at full resolution, sharpened</figcaption></figure>
     </div>
     <div class="pair">
-      <figure><img src="./media/inputs/statue_of_liberty.jpg" alt="Original Statue of Liberty at night"><figcaption>Statue of Liberty &middot; original</figcaption></figure>
-      <figure><img src="./media/2.1/sl_sharp.jpg" alt="Sharpened Statue of Liberty"><figcaption>Statue of Liberty &middot; sharpened, &alpha; = 5</figcaption></figure>
+      <figure><img src="./media/inputs/statue_of_liberty.jpg" alt="Original Statue of Liberty at night"><figcaption>Statue of Liberty original</figcaption></figure>
+      <figure><img src="./media/2.1/sl_sharp.jpg" alt="Sharpened Statue of Liberty"><figcaption>Statue of Liberty sharpened, &alpha; = 5</figcaption></figure>
     </div>
-    <p>I tried this on some of my own images I took in New York. The first is a blurry image of the city. Sharpening led to better results, such as the building lights becoming less blurry and cloudy. Similarly, the Statue of Liberty is less blurry and pronounced.</p>
+    <p>I tried this on some of my own blurry images I took on a New York trip this summer, which were taken at night and on a moving Staten Island Ferry. The first is a blurry image of the city. Sharpening led to better results, such as the building lights becoming less blurry and cloudy. Similarly, the Statue of Liberty is less cloudy.</p>
 
     <h3>Blur, then re-sharpen</h3>
     <div class="single">
       <figure><img src="./media/inputs/alps.jpg" alt="Original alpine valley photo"><figcaption>Original (3072&times;2048, shown downscaled)</figcaption></figure>
     </div>
     <div class="triple">
-      <figure><img src="./media/2.1/alps_crop.png" alt="Full-resolution crop of mountain peaks, original"><figcaption>Crop &middot; original</figcaption></figure>
-      <figure><img src="./media/2.1/alps_blur_crop.png" alt="Same crop, blurred"><figcaption>Crop &middot; blurred (&sigma; = 2)</figcaption></figure>
-      <figure><img src="./media/2.1/alps_sharp_crop.png" alt="Same crop, blurred then re-sharpened"><figcaption>Crop &middot; re-sharpened (&alpha; = 5)</figcaption></figure>
+      <figure><img src="./media/2.1/alps_crop.png" alt="Full-resolution crop of mountain peaks, original"><figcaption>Crop of original</figcaption></figure>
+      <figure><img src="./media/2.1/alps_blur_crop.png" alt="Same crop, blurred"><figcaption>Crop of blurred (&sigma; = 2)</figcaption></figure>
+      <figure><img src="./media/2.1/alps_sharp_crop.png" alt="Same crop, blurred then re-sharpened"><figcaption>Crop of re-sharpened (&alpha; = 5)</figcaption></figure>
     </div>
-    <p>As an eval, we also take an image, blur it, then resharpen it. As shown, the blurry mountains resharpen through our algorithm, although not perfectly, given some information is lost in the process of blurring.</p>
+    <p>As an eval, we also take an image, blur it, then resharpen it. As shown, the blurry mountains resharpen through our algorithm. This is still not perfect, however, as some information is lost in the process of blurring.</p>
   </section>
 
   <!-- ================================================================ -->
   <section>
     <h2>Part 2.2: Hybrid images</h2>
 
-    <p>Next, I played around with making hybrid images. The idea is to low pass one image, high pass the other (image minus the Gaussian blur), and then add them. The high frequency image is visible up close, but the low frequency one is more visible from far away. Below, we analyze this technique for several pairs of images, principally Agamemnon's helmet from Christopher Nolan's the Odyssey, and the actor who plays him under the helmet, Benny Safdie. The images were first aligned such that the hybrid would have a cleaner transition perspective between the two images. Then, Benny's high frequencies removed and the helmet's low frequencies removed. When added together, the helmet appears up-close, but farther away, and it largely disappears, leaving Benny.</p>
+    <p>Next, I played around with making hybrid images. How do we do this? We want to low-pass one image, high-pass the other (again, image - the Gaussian blur), and then add them. The high frequency image is visible up close, but the low frequency one is more visible from far away.</p> 
+    
+    <p>Below, we analyze this technique for several pairs of images, mainly Agamemnon's helmet from Christopher Nolan's the Odyssey, and the actor who plays him under the helmet, Benny Safdie. The images were first aligned. Then, Benny's high frequencies and the helmet's low frequencies were removed. When added together, the helmet appears up-close but it largely disappears farther away, leaving Benny.</p>
 
     <h3>Full process: Benny &times; Agamemnon helmet</h3>
 
@@ -401,8 +406,8 @@
     </div>
 
     <div class="pair">
-      <figure><img src="./media/2.2/benny_aligned.png" alt="Benny after alignment"><figcaption>Aligned &middot; Benny</figcaption></figure>
-      <figure><img src="./media/2.2/helmet_aligned.png" alt="Helmet after alignment"><figcaption>Aligned &middot; helmet</figcaption></figure>
+      <figure><img src="./media/2.2/benny_aligned.png" alt="Benny after alignment"><figcaption>Aligned Benny</figcaption></figure>
+      <figure><img src="./media/2.2/helmet_aligned.png" alt="Helmet after alignment"><figcaption>Aligned helmet</figcaption></figure>
     </div>
 
     <div class="pair">
@@ -419,7 +424,7 @@
       <figure><img src="./media/2.2/hybrid_fourier.png" alt="FFT of hybrid"><figcaption>Hybrid</figcaption></figure>
     </div>
 
-    <p>We chose a cutoff of &sigma;<sub>1</sub> = 4 for the high pass and &sigma;<sub>2</sub> = 7 for the low pass through some trial and error. This allowed for the helmet to show up close while Benny isn't as prominent, but disappear at a distance. We also did an FFT analysis of each original image, the frequency passed images, and the hybrid. Both original images have a mix of low and high frequencies and the brightness scatters across the image. With Benny, the high frequencies are removed, so the FFT plot becomes a lot darker along the regions corresponding to high frequencies, but a very bright center. In contrast, the low frequencies are removed for the helmet, so the plot is bright all across. The final image adds both of these low and high freqencies, resulting in a similar kind of mixed plot as the original images in the hybrid image. </p>
+    <p>We chose a cutoff of &sigma;<sub>1</sub> = 4 for the high-pass and &sigma;<sub>2</sub> = 7 for the low-pass through  trial and error. This allowed for the helmet to show up close, but disappear at a distance. We also did an FFT analysis of the original images, the filtered images, and the hybrid image. Both original images have a mix of low and high frequencies, and the "brightness" reflecting frequency presence scatters across the whole plot. With Benny, the high frequencies are removed, so the FFT plot becomes a lot darker along the regions corresponding to high frequencies, but a very bright center. In contrast, the low frequencies are removed for the helmet, so the plot is bright all across. The final image adds both of these low and high freqencies, resulting in a similar kind of mixed plot as the original images, shown in the spread-out distribution of brightness on the plot.</p>
 
     <div class="distance">
       <figure><img src="./media/2.2/agammemnon_hybrid.png" alt="Benny and helmet hybrid, large"><figcaption>Hybrid (up close)</figcaption></figure>
@@ -449,17 +454,17 @@
       <figure><img src="./media/2.2/rooster_trex_hybrid.jpg" alt="Rooster and T. rex hybrid, small"><figcaption>Farther</figcaption></figure>
       <figure><img src="./media/2.2/rooster_trex_hybrid.jpg" alt="Rooster and T. rex hybrid, tiny"><figcaption>Far</figcaption></figure>
     </div>
-    <p>Another custom pair. Roosters being an evolutionary descendent of T-Rexes, I thought it would be cool to hybridize images of the two (T-Rex low-pass, so we see what the rooster once was from a distance!). However, this one was a bit harder to align. The distance visual trick still works, but is less effective with two very differently-shaped and difficult-to-align subjects.</p>
+    <p>Another custom pair. With roosters being an evolutionary descendent of T-Rexes, I thought it would be funny to hybridize images of the two (T-Rex low-pass, so we see what the rooster once was when viewed from a physical distance). However, this one was a bit harder to align. The distance visual trick still works, but is less effective with two very differently-shaped and difficult-to-align subjects. This is less of a good transition as, for example, two faces.</p>
   </section>
 
   <!-- ================================================================ -->
   <section>
     <h2>Part 2.3: Gaussian and Laplacian stacks</h2>
 
-    <p>Finally, we aim to blend two images while trying our best not to have a sharp divide between the objects of interest. To do this, we use stacks. With the Gaussian stack, we repeatedly blur (sigma = 6 in this case) each image, and save these results across levels. We then use a Laplacian stack, which takes the difference between consecutive Gaussian levels, highlighting frequency differences between each level. At the last level, we simply append the last Gaussian level. Below is an example of stacking, reproducing the figure from Szeliski Fig. 3.42, where the first three rows are laplacian levels 0, 2, 4, and our summed result on the last row,. For this figure, +0.5 is added to the image so the clipped image (between 0 and 1) does not discount negative values (negative values become dark gray, and the positive ones become lighter gray). As we move down the stack, we go from finer details being captured, to smooth, wider transitions instead.</p>
+    <p>Finally, we aim to blend two images while trying our best not to have a sharp divide between the objects of interest. To do this, we use stacks. With the Gaussian stack, we repeatedly blur (sigma = 6 in this case) each image, and save these results across levels. We then use a Laplacian stack, which takes the difference between consecutive Gaussian levels, highlighting frequency differences between each level. At the last level, we simply append the last Gaussian level. Below is an example of stacking, reproducing the figure from Szeliski Fig. 3.42, where the first three rows are laplacian levels 0, 2, 4, and our final summed result on the last row. For this figure, +0.5 is added to the image so the clipped image (between 0 and 1) does not discount negative values (negative values become dark gray, and the positive ones become lighter gray). As we move down the stack, we go from finer details being captured, to smooth, wider transitions instead.</p>
 
     <div class="single">
-      <figure><img src="./media/2.3/oraple_stacks.png" alt="Recreation of Szeliski Figure 3.42: masked Laplacian levels of the apple, the orange, and their sum, plus the final collapsed images"><figcaption>Recreating Szeliski Fig. 3.42. Rows: Laplacian levels 0, 2, 4, then the collapsed result. Columns: masked apple, masked orange, combined.</figcaption></figure>
+      <figure><img src="./media/2.3/oraple_stacks.png" alt="Recreation of Szeliski Figure 3.42: masked Laplacian levels of the apple, the orange, and their sum, plus the final collapsed images"><figcaption>Recreating Szeliski Fig. 3.42. Rows are Laplacian levels 0, 2, 4 and then the final result. Columns are the masked apple, masked orange, and then combined.</figcaption></figure>
     </div>
 
   </section>
@@ -468,7 +473,7 @@
   <section>
     <h2>Part 2.4: Multiresolution blending</h2>
 
-    <p>Now how do we actually use these stacks to build blends? Following the formula from Page 230 of the paper above, we take the Laplacian stacks of both images and the Gaussian stack of the mask. Then, we blend each level with the mask at that level according to the equation below. We then sum across all the levels. Intuitively, the algorithm addresses the problem of having various frequencies to deal with when blending images. High frequency texture need a shorter, sharper transition, while low frequency texture need a wider transition. We split up the image by different levels to get each of these different levels of detail, blend at each of these level with the corresponding Gaussian blur according to the sharpness of the transition, and then add all of these results together, preserving sharp and wide transitions between images. </p>
+    <p>Now how do we actually use these stacks to build blends? Following the formula from Page 230 of the paper above, we take the Laplacian stacks of both images and the Gaussian stack of the mask. Then, we blend each level with the mask at that level according to the equation below. We then sum across all the levels. Intuitively, the algorithm addresses the problem of having various frequencies to deal with when blending images. High frequency texture need a shorter, sharper transition, while low frequency texture need a wider transition. We split up the image by different levels to get each of these different levels of detail, blend at each of these levels with the corresponding Gaussian blur, and then add all of these results together, preserving sharp and wide transitions between images. </p>
     <div class="eq">
       $$LS_l(i, j) = GR_l(i, j)\, LA_l(i, j) + \big(1 - GR_l(i, j)\big)\, LB_l(i, j), \qquad S = \sum_l LS_l$$
     </div>
@@ -496,9 +501,16 @@
     </div>
 
     <div class="single">
-      <figure><img src="./media/2.4/king_cyrus_stacks.png" alt="Laplacian stack visualization for the irregular-mask blend"><figcaption>Blending process, laid out like Burt &amp; Adelson Fig. 10. Rows: levels 0, 2, 4, then the collapsed result.</figcaption></figure>
+      <figure><img src="./media/2.4/king_cyrus_stacks.png" alt="Laplacian stack visualization for the irregular-mask blend"><figcaption></figcaption></figure>
     </div>
-    <p>The first two images use a vertical mask, with 0s on one half and 1s on the other. The oraple image from the original paper looks strong and similar to the paper. The Lion + Tiger example was much more difficult to get right, especially because of the stark lighting and background changes between the two images. The last image is my favorite, with an irregular ellipse mask for the eye. Here, I am taking the rock carving of a Persian king, which typically have clear eyes, and replacing it with the eye of Cyrus the Great in a painting of his, facing the same direction. The images were aligned, so the eyes sit on top of each other, and the blend made for a suprisingly natural final image, shown on the right. Like the oraple example, moving down the stack goes from finer texture to smoother and wider ones, allowing us to capture blend transitions acros multiple frequency levels.</p>
+    <p>The first two images use a vertical mask, with 0s on one half and 1s on the other. The oraple image from the original paper looks strong and similar to the paper. The Lion + Tiger example was much more difficult to get right, especially because of the stark lighting and background changes between the two images. The last image is my favorite, with an irregular ellipse mask for the eye. Here, I am taking the stone relief of a Persian king, which typically have clear eyes, and replacing it with the painted eye of Cyrus the Great, the first Persian king. The images were aligned such that the eyes sit on top of each other, and the blend made for a suprisingly natural final image, shown on the right. Like the oraple example, moving down the stack goes from finer texture to smoother and wider ones, allowing us to capture blend transitions across multiple frequency levels.</p>
+  </section>
+
+  <!-- ================================================================ -->
+  <section>
+    <h2>What did I learn?</h2>
+    One of the most important things I learned from this project was representing images as a collection of frequencies, which can be manipulated to improve or combine images. In the first part of this assignment, high frequencies were leveraged through gradients to create edge detectors. Doing a low-pass filter on the original image, which removes high frequencies and is an example of further frequency manipulation, we were able to improve our edge detection by limiting noise. In the second part, leveraging frequencies played an even bigger role: adding back the high frequency, image-defining details to the original image improved image sharpness, and the hybrid images involved combining the filtered frequencies of multiple images to enable the observed distance effect. Finally, blending images differently at each level through the Gaussian and Laplacian stack allowed us to address the blend one frequency level at a time, including both high frequency and low frequency features, to create an overall smooth transition. Therefore, viewing the features of images in terms of its frequencies and manipulating can lead to greater control over a given image and its characteristics.
+    <p></p>
   </section>
 
 </main>
